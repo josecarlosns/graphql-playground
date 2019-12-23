@@ -1,12 +1,55 @@
 import { GraphQLServer } from 'graphql-yoga';
 
+const users = [
+  {
+    id: '1',
+    name: 'John Doe',
+    email: 'johndoe@email.com',
+    age: 22
+  },
+  {
+    id: '2',
+    name: 'Mary Sue',
+    email: 'marysue@email.com',
+    age: 31
+  },
+  {
+    id: '3',
+    name: 'Mike Sho',
+    age: 21
+  }
+];
+
+const posts = [
+  {
+    id: 12,
+    title: 'so theory',
+    body: "I'm hungry",
+    published: true,
+    author: '1'
+  },
+  {
+    id: 13,
+    title: 'marketing',
+    body: 'who are you?',
+    published: false,
+    author: '1'
+  },
+  {
+    id: 15,
+    title: 'publishing',
+    body: 'bcuz of course',
+    published: false,
+    author: '3'
+  }
+];
+
 const typeDefs = `
     type Query {
-      greeting(name: String): String!
       me: User!
       post: Post!
-      grades: [Float!]!
-      add(numbers: [Float!]!): Float!
+      users(query: String): [User!]!
+      posts: [Post!]!
     }
 
     type User {
@@ -21,6 +64,7 @@ const typeDefs = `
       title: String!
       body: String!
       published: Boolean
+      author: User!
     }
 `;
 
@@ -39,19 +83,25 @@ const resolvers = {
         id: '321fdsa',
         title: 'Casa engraçada',
         body: 'Uma casa muito engraçada',
-        ṕublished: false
+        published: false,
+        author: '2'
       };
     },
-    greeting(_, args) {
-      if (args.name) return `Hello ${args.name}!`;
+    users(parent, args, context, info) {
+      if (args.query)
+        return users.filter(user =>
+          user.name.toLowerCase().includes(args.query.toLowerCase())
+        );
 
-      return 'Hello!';
+      return users;
     },
-    grades() {
-      return [9.9, 1.2, 10];
-    },
-    add(parent, args, ctx, info) {
-      return args.numbers.reduce((acc, val) => acc + val);
+    posts(parent, args, context, info) {
+      return posts;
+    }
+  },
+  Post: {
+    author(parent, args, ctx, info) {
+      return users.find(user => user.id === parent.author);
     }
   }
 };
