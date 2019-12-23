@@ -44,12 +44,40 @@ const posts = [
   }
 ];
 
+const comments = [
+  {
+    id: 11,
+    author: '1',
+    post: 13,
+    body: 'My name is methos'
+  },
+  {
+    id: 22,
+    author: '2',
+    post: 13,
+    body: "I'm Quelana of Izalith"
+  },
+  {
+    id: 33,
+    author: '2',
+    post: 15,
+    body: 'Of course what?'
+  },
+  {
+    id: 21,
+    author: '3',
+    post: 15,
+    body: 'Of course'
+  }
+];
+
 const typeDefs = `
     type Query {
       me: User!
       post: Post!
       users(query: String): [User!]!
       posts: [Post!]!
+      comments: [Comment!]!
     }
 
     type User {
@@ -58,6 +86,7 @@ const typeDefs = `
       email: String
       age: Int!
       posts: [Post!]!
+      comments: [Comment!]!
     }
 
     type Post {
@@ -66,6 +95,14 @@ const typeDefs = `
       body: String!
       published: Boolean
       author: User!
+      comments: [Comment!]!
+    }
+
+    type Comment {
+      id: ID!
+      author: User!
+      post: Post!
+      body: String!
     }
 `;
 
@@ -98,16 +135,33 @@ const resolvers = {
     },
     posts(parent, args, context, info) {
       return posts;
+    },
+    comments() {
+      return comments;
     }
   },
   Post: {
     author(parent, args, ctx, info) {
       return users.find(user => user.id === parent.author);
+    },
+    comments(parent) {
+      return comments.filter(comment => parent.id === comment.post);
     }
   },
   User: {
     posts(parent, args, ctx, info) {
       return posts.filter(post => post.author === parent.id);
+    },
+    comments(parent) {
+      return comments.filter(comment => parent.id === comment.author);
+    }
+  },
+  Comment: {
+    author(parent) {
+      return users.find(user => user.id === parent.author);
+    },
+    post(parent) {
+      return posts.find(post => post.id === parent.post);
     }
   }
 };
