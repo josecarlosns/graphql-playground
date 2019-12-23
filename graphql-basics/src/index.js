@@ -2,11 +2,9 @@ import { GraphQLServer } from 'graphql-yoga';
 
 const typeDefs = `
     type Query {
-        id: ID!
-        name: String!
-        age: Int!
-        employed: Boolean!
-        gpa: Float
+      greeting(name: String): String!
+      me: User!
+      post: Post!
     }
 
     type User {
@@ -15,24 +13,37 @@ const typeDefs = `
       email: String
       age: Int!
     }
+
+    type Post {
+      id: ID!
+      title: String!
+      body: String!
+      published: Boolean
+    }
 `;
 
 const resolvers = {
   Query: {
-    id() {
-      return 'asdf123';
+    me() {
+      return {
+        id: 'asdf123',
+        name: 'John Doe',
+        email: 'johndoe@email.com',
+        age: 32
+      };
     },
-    name() {
-      return 'mary sue';
+    post() {
+      return {
+        id: '321fdsa',
+        title: 'Casa engraçada',
+        body: 'Uma casa muito engraçada',
+        ṕublished: false
+      };
     },
-    age() {
-      return 32;
-    },
-    employed() {
-      return true;
-    },
-    gpa() {
-      return null;
+    greeting(_, args) {
+      if (args.name) return `Hello ${args.name}!`;
+
+      return 'Hello!';
     }
   }
 };
