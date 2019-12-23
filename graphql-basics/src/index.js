@@ -5,6 +5,8 @@ const typeDefs = `
       greeting(name: String): String!
       me: User!
       post: Post!
+      grades: [Float!]!
+      add(numbers: [Float!]!): Float!
     }
 
     type User {
@@ -44,6 +46,12 @@ const resolvers = {
       if (args.name) return `Hello ${args.name}!`;
 
       return 'Hello!';
+    },
+    grades() {
+      return [9.9, 1.2, 10];
+    },
+    add(parent, args, ctx, info) {
+      return args.numbers.reduce((acc, val) => acc + val);
     }
   }
 };
