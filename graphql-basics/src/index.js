@@ -157,9 +157,7 @@ const resolvers = {
 
       const user = {
         id: uuid(),
-        name: args.name,
-        email: args.email,
-        age: args.age
+        ...args
       };
 
       users.push(user);
@@ -173,10 +171,7 @@ const resolvers = {
 
       const newPost = {
         id: uuid(),
-        title: args.title,
-        body: args.body,
-        author: args.author,
-        published: args.published
+        ...args
       };
 
       posts.push(newPost);
@@ -193,9 +188,7 @@ const resolvers = {
 
       const newComment = {
         id: uuid(),
-        body: args.body,
-        author: args.author,
-        post: args.post
+        ...args
       };
 
       return newComment;
