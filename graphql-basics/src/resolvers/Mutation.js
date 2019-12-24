@@ -1,0 +1,126 @@
+import uuid from 'uuid/v4';
+
+const mutation = {
+  // USERS
+  createUser(parent, args, { db }, info) {
+    const emailTaken = db.users.some(user => user.email === args.data.email);
+
+    if (emailTaken) {
+      throw new Error('Email already taken!');
+    }
+
+    const user = {
+      id: uuid(),
+      ...args.data
+    };
+
+    db.users.push(user);
+
+    return user;
+  },
+  deleteUser(parent, args, { db }, info) {
+    const userFound = db.users.find(user => user.id === args.id);
+
+    if (!userFound) throw new Error('User not found!');
+
+    db.users = db.users.filter(user => user.id !== args.id);
+
+    db.posts = db.posts.filter(post => {
+      const match = post.author === args.id;
+
+      if (match) {
+        db.comments = db.comments.filter(comment => comment.post !== post.id);
+      }
+
+      return !match;
+    });
+
+    db.comments = db.comments.filter(comment => comment.author !== args.id);
+
+    return userFound;
+  },
+  updateUser(parent, args, { db }, info) {
+    const { id, data } = args;
+
+    const user = db.users.find(user => user.id === id);
+
+    if (!user) throw new Error('User not found');
+
+    if (data.email) {
+      const emailTaken = db.users.find(user => user.email === data.email);
+
+      if (emailTaken) throw new Error('Email taken');
+
+      user.email = data.email;
+    }
+
+    if (data.name) user.name = data.name;
+
+    if (data.age) user.age = data.age;
+
+    return user;
+  },
+
+  // POSTS
+  createPost(parent, args, { db }, info) {
+    const userExists = db.users.some(user => user.id === args.data.author);
+
+    if (!userExists) throw new Error('Author not found!');
+
+    const newPost = {
+      id: uuid(),
+      ...args.data
+    };
+
+    db.posts.push(newPost);
+
+    return newPost;
+  },
+  deletePost(parent, args, { db }, info) {
+    const deletedPost = db.posts.find(post => post.id === args.id);
+
+    if (!deletedPost) throw new Error('Post not found');
+
+    db.posts = db.posts.filter(post => {
+      const match = post.id === args.id;
+
+      if (match) {
+        db.comments = db.comments.filter(comment => comment.post !== post.id);
+      }
+
+      return !match;
+    });
+
+    return deletedPost;
+  },
+
+  // COMMENTS
+  createComment(parent, args, { db }, info) {
+    const userExists = db.users.some(user => user.id === args.data.author);
+    const postExists = db.posts.some(post => post.id === args.data.post);
+
+    if (!userExists) throw new Error('Author not found!');
+
+    if (!postExists) throw new Error('Post not found!');
+
+    const newComment = {
+      id: uuid(),
+      ...args.data
+    };
+
+    db.comments.push(newComment);
+
+    return newComment;
+  },
+  deleteComment(parent, args, { db }, info) {
+    const deletedComment = db.comments.find(comment => comment.id === args.id);
+
+    if (!deletedComment) throw new Error('Comment not found');
+
+    db.comments = db.comments.filter(comment => comment.id !== args.id);
+
+    return deletedComment;
+  }
+};
+
+export default mutation;
