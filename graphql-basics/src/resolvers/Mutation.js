@@ -93,6 +93,23 @@ const mutation = {
 
     return deletedPost;
   },
+  updatePost(parent, args, { db }, info) {
+    const { id, data } = args;
+
+    const updatedPost = db.posts.find(post => post.id === id);
+
+    if (!updatedPost) throw new Error('Post not found');
+
+    if (data.title) updatedPost.title = data.title;
+
+    if (data.body) updatedPost.body = data.body;
+
+    if (data.author) updatedPost.author = data.author;
+
+    if (data.published !== undefined) updatedPost.published = data.published;
+
+    return updatedPost;
+  },
 
   // COMMENTS
   createComment(parent, args, { db }, info) {
@@ -120,6 +137,21 @@ const mutation = {
     db.comments = db.comments.filter(comment => comment.id !== args.id);
 
     return deletedComment;
+  },
+  updateComment(parent, args, { db }, info) {
+    const { id, data } = args;
+
+    const updatedComment = db.comments.find(comment => comment.id === id);
+
+    if (!updatedComment) throw new Error('Comment not found');
+
+    if (data.body) updatedComment.body = data.body;
+
+    if (data.author) updatedComment.author = data.author;
+
+    if (data.post) updatedComment.post = data.post;
+
+    return updatedComment;
   }
 };
 
