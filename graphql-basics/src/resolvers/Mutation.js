@@ -2,7 +2,7 @@ import uuid from 'uuid/v4';
 
 const mutation = {
   // USERS
-  createUser(parent, args, { db }, info) {
+  createUser(parent, args, { db, pubsub }, info) {
     const emailTaken = db.users.some(user => user.email === args.data.email);
 
     if (emailTaken) {
@@ -15,6 +15,9 @@ const mutation = {
     };
 
     db.users.push(user);
+    pubsub.publish('users', {
+      user
+    });
 
     return user;
   },
@@ -62,7 +65,7 @@ const mutation = {
   },
 
   // POSTS
-  createPost(parent, args, { db }, info) {
+  createPost(parent, args, { db, pubsub }, info) {
     const userExists = db.users.some(user => user.id === args.data.author);
 
     if (!userExists) throw new Error('Author not found!');
@@ -73,10 +76,16 @@ const mutation = {
     };
 
     db.posts.push(newPost);
-
+    if (newPost.published)
+      pubsub.publish('posts', {
+        post: {
+          mutation: 'CREATE',
+          data: newPost
+        }
+      });
     return newPost;
   },
-  deletePost(parent, args, { db }, info) {
+  deletePost(parent, args, { db, pubsub }, info) {
     const deletedPost = db.posts.find(post => post.id === args.id);
 
     if (!deletedPost) throw new Error('Post not found');
@@ -91,9 +100,17 @@ const mutation = {
       return !match;
     });
 
+    if (deletedPost.published)
+      pubsub.publish('posts', {
+        post: {
+          mutation: 'DELETE',
+          data: deletedPost
+        }
+      });
+
     return deletedPost;
   },
-  updatePost(parent, args, { db }, info) {
+  updatePost(parent, args, { db, pubsub }, info) {
     const { id, data } = args;
 
     const updatedPost = db.posts.find(post => post.id === id);
@@ -108,11 +125,18 @@ const mutation = {
 
     if (data.published !== undefined) updatedPost.published = data.published;
 
+    pubsub.publish('posts', {
+      post: {
+        mutation: 'UPDATED',
+        data: updatedPost
+      }
+    });
+
     return updatedPost;
   },
 
   // COMMENTS
-  createComment(parent, args, { db }, info) {
+  createComment(parent, args, { db, pubsub }, info) {
     const userExists = db.users.some(user => user.id === args.data.author);
     const postExists = db.posts.some(post => post.id === args.data.post);
 
@@ -126,6 +150,9 @@ const mutation = {
     };
 
     db.comments.push(newComment);
+    pubsub.publish(`POST.${args.data.post}.COMMENTS`, {
+      comment: newComment
+    });
 
     return newComment;
   },

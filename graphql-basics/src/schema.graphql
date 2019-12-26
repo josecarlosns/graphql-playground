@@ -80,3 +80,15 @@ type Comment {
   post: Post!
   body: String!
 }
+
+type Subscription {
+  count: Int!
+  comment(postId: ID!): Comment!
+  post: PostSubscriptionPayload!
+  user: User!
+}
+
+type PostSubscriptionPayload {
+  mutation: String!
+  data: Post!
+}

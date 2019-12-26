@@ -30,14 +30,14 @@ const posts = [
     id: '13',
     title: 'marketing',
     body: 'who are you?',
-    published: false,
+    published: true,
     author: '1'
   },
   {
     id: '14',
     title: 'publishing',
     body: 'bcuz of course',
-    published: false,
+    published: true,
     author: '3'
   }
 ];
