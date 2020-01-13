@@ -1,0 +1,13 @@
+{
+    "sqltools.connections": [
+        {
+            "database": "graphql-playground",
+            "dialect": "PostgreSQL",
+            "name": "Graphql-playground DB",
+            "password": "vi7700",
+            "port": 5434,
+            "server": "localhost",
+            "username": "postgres"
+        }
+    ]
+}
